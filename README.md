@@ -37,7 +37,6 @@ Under "Contest scope information" below, include the following:
 - [ ] Describe anything else that adds any special logic that makes your approach unique
 - [ ] Identify any areas of specific concern in reviewing the code
 - [ ] Add all of the code to this repo that you want reviewed
-- [ ] Make sure your code is thoroughly commented using the [NatSpec format](https://docs.soliditylang.org/en/v0.5.10/natspec-format.html#natspec-format).
 - [ ] Create a PR to this repo with the above changes.
 - [ ] Delete this checklist and wait for C4 to provide a recommended contest minimum.
 
@@ -61,6 +60,7 @@ Under "Contest scope information" below, include the following:
 - [ ] Delete this checklist.
 
 ## ⭐️ Sponsor: Contest prep
+- [ ] Make sure your code is thoroughly commented using the [NatSpec format](https://docs.soliditylang.org/en/v0.5.10/natspec-format.html#natspec-format).
 - [ ] Modify the bottom of this `README.md` file to describe how your code is supposed to work with links to any relevent documentation and any other criteria/details that the C4 Wardens should keep in mind when reviewing
 - [ ] Please have final versions of contracts and documentation added/updated in this repo **no less than 8 hours prior to contest start time.**
 - [ ] Ensure that you have access to the _findings_ repo where issues will be submitted.
