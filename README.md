@@ -2,9 +2,29 @@
 
 Notional is a fixed rate lending and borrowing platform, built on Ethereum. **Fixed rates** differ from variable rates or stable rates because the interest rate **will not** change by for the term of the loan. Fixed rate loans are 25x variable rate loans in traditional financial markets because of the superior guarantees they offer. [Notional V1](https://github.com/notional-finance/contracts) first introduced our concepts of how to achieve fixed rates on Ethereum and Notional V2 extends upon those concepts to add support for fixed term loans out to 20 years. Notional V2 also introduces many improvements upon Notional V1, including superior capital efficiency, better upgradeability, and on chain governance.
 
+---
+
+# Contest scope information
+
+All code in `contracts/` is in scope, excluding `contracts/mocks/`. A full protocol description can be found in [the whitepaper](WHITEPAPER.md).
+
+Our primary concern is both the technical and economic security of user funds. We expect that the contracts accurately track user funds and there are no arbitrage conditions present. Notional V2 allows users to gain leverage and collateralize their positions in many ways (a single currency can be used as collateral in four ways: cToken 'asset cash' balances, nToken balances, fCash and liquidity tokens). As a result, liquidation is an area of special concern. We must ensure that users can be liquidated in all scenarios where they become undercollateralized.
+
+## Notional V2 contest details
+
+- TBD main award pot
+- TBD gas optimization award pot
+- Join [C4 Discord](https://discord.gg/EY5dvm3evD) to register
+- Submit findings [using the C4 form](https://c4-TBD.netlify.app/)
+- [Read our guidelines for more details](https://code423n4.com/compete)
+- Starts TBD XXX XXX XX 00:00 UTC
+- Ends TBD XXX XXX XX 23:59 UTC
+
+---
+
 ## Codebase
 
-The codebase is broken down into the following modules, each directory has a `_README.md` file that describes the module. A full protocol description can be found in WHITEPAPER.md.
+The codebase is broken down into the following modules, each directory has a `_README.md` file that describes the module.
 
 ```
 contracts
@@ -34,6 +54,10 @@ contracts
 └── math: math libraries
 └── mocks: mock contracts for testing internal libraries
 ```
+
+### External Dependencies
+
+Notional V2 relies on two main external on chain dependencies, Compound Finance cTokens (or any other compatible money market token) and Chainlink compatible exchange rate oracles. OpenZeppelin contracts for `CREATE2`, upgradeable proxies, and SafeMath are used with the version set to `3.4.0-solc-0.7`. Notional V2 is compiled on Solidity 0.7.5.
 
 # Statistics
 
