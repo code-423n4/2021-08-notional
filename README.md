@@ -1,64 +1,17 @@
-# ✨ So you want to sponsor a contest
+# Notional Contracts V2
 
-This `README.md` contains a set of checklists for our contest collaboration.
-
-Your contest will use two repos: 
-- **a _contest_ repo** (this one), which is used for scoping your contest and for providing information to contestants (wardens)
-- **a _findings_ repo**, where issues are submitted. (We'll set that one up later.) 
-
-Ultimately, when we launch the contest, this contest repo will be made public and will contain the smart contracts to be reviewed and all the information needed for contest participants. The findings repo will be made public after the contest is over and your team has mitigated the identified issues.
-
-Some of the checklists in this doc are for **C4 (🐺)** and some of them are for **you as the contest sponsor (⭐️)**.
-
----
-
-# Contest scoping
-
-## ⭐️ Sponsor: Provide contest scoping details
-
-Under "Contest scope information" below, include the following:
-
-- [ ] Name of each contract and:
-  - [ ] lines of code in each
-  - [ ] external contracts called in each
-  - [ ] libraries used in each
-- [ ] Describe any novel or unique curve logic or mathematical models implemented in the contracts
-- [ ] Does the token conform to the ERC-20 standard? In what specific ways does it differ?
-- [ ] Describe anything else that adds any special logic that makes your approach unique
-- [ ] Identify any areas of specific concern in reviewing the code
-- [ ] Add all of the code to this repo that you want reviewed
-- [ ] Create a PR to this repo with the above changes.
-- [ ] Delete this checklist and wait for C4 to provide a recommended contest minimum.
+Notional is a fixed rate lending and borrowing platform, built on Ethereum. **Fixed rates** differ from variable rates or stable rates because the interest rate **will not** change by for the term of the loan. Fixed rate loans are 25x variable rate loans in traditional financial markets because of the superior guarantees they offer. [Notional V1](https://github.com/notional-finance/contracts) first introduced our concepts of how to achieve fixed rates on Ethereum and Notional V2 extends upon those concepts to add support for fixed term loans out to 20 years. Notional V2 also introduces many improvements upon Notional V1, including superior capital efficiency, better upgradeability, and on chain governance.
 
 ---
 
 # Contest scope information
 
-[ ⭐️ SPONSORS ADD INFO HERE ]
+All code in `contracts/` is in scope, excluding `contracts/mocks/`. A full protocol description can be found in [the whitepaper](WHITEPAPER.md).
 
----
+Our primary concern is both the technical and economic security of user funds. We expect that the contracts accurately track user funds and there are no arbitrage conditions present. Notional V2 allows users to gain leverage and collateralize their positions in many ways (a single currency can be used as collateral in four ways: cToken 'asset cash' balances, nToken balances, fCash and liquidity tokens). As a result, liquidation is an area of special concern. We must ensure that users can be liquidated in all scenarios where they become undercollateralized.
 
-# Contest prep
+## Notional V2 contest details
 
-## 🐺 C4: Contest prep
-- [ ] Rename contest H1 below
-- [ ] Add link to report form in contest details below
-- [ ] Update pot sizes
-- [ ] Fill in start and end times in contest bullets below.
-- [ ] Move any relevant information in "contest scope information" above to the bottom of this readme.
-- [ ] Add matching info to the [code423n4.com public contest data here](https://github.com/code-423n4/code423n4.com/tree/main/data/contests))
-- [ ] Delete this checklist.
-
-## ⭐️ Sponsor: Contest prep
-- [ ] Make sure your code is thoroughly commented using the [NatSpec format](https://docs.soliditylang.org/en/v0.5.10/natspec-format.html#natspec-format).
-- [ ] Modify the bottom of this `README.md` file to describe how your code is supposed to work with links to any relevent documentation and any other criteria/details that the C4 Wardens should keep in mind when reviewing
-- [ ] Please have final versions of contracts and documentation added/updated in this repo **no less than 8 hours prior to contest start time.**
-- [ ] Ensure that you have access to the _findings_ repo where issues will be submitted.
-- [ ] Delete this checklist and all text above the line below when you're ready.
-
----
-
-# # Notional V2 contest details
 - TBD main award pot
 - TBD gas optimization award pot
 - Join [C4 Discord](https://discord.gg/EY5dvm3evD) to register
@@ -67,8 +20,103 @@ Under "Contest scope information" below, include the following:
 - Starts TBD XXX XXX XX 00:00 UTC
 - Ends TBD XXX XXX XX 23:59 UTC
 
-This repo will be made public before the start of the contest.
+---
 
-[ ⭐️ SPONSORS ADD INFO HERE ]
+## Codebase
 
+The codebase is broken down into the following modules, each directory has a `_README.md` file that describes the module.
 
+```
+contracts
+|
+└── external: all externally deployable contracts
+|   └── actions: implementations of externally callable methods
+|   └── adapters: adapter contracts used to interface between systems
+|   └── governance: on chain governance system, forked from Compound Governor Alpha and COMP token (thanks!)
+|
+|       FreeCollateralExternal.sol: deployed library for checking account free collateral positions
+|       Router.sol: implementation for proxy contract that delegates calls to appropriate action contract
+|       SettleAssetsExternal.sol: deployed library for settling matured assets to cash
+|       Views.sol: view only methods for inspecting system state
+|
+└── global: storage, struct and constant definitions
+└── internal: shared internal libraries for handling generic system wide functionality
+|   └── balances: encapsulates all internal balance and token transfer logic
+|   └── liquidation: contains calculations for determining liquidation amounts
+|   └── markets: contains logic for defining tradable assets and fCash liquidity curve
+|   └── portfolio: handlers for account portfolios and transferring assets between them
+|   └── settlement: contains logic for settling matured assets in portfolios
+|   └── valuation: calculations for determining account free collateral positions
+|
+|       AccountContextHandler.sol: manages per account metadata
+|       nTokenHandler.sol: manages nToken configuration and metadata
+|
+└── math: math libraries
+└── mocks: mock contracts for testing internal libraries
+```
+
+### External Dependencies
+
+Notional V2 relies on two main external on chain dependencies, Compound Finance cTokens (or any other compatible money market token) and Chainlink compatible exchange rate oracles. OpenZeppelin contracts for `CREATE2`, upgradeable proxies, and SafeMath are used with the version set to `3.4.0-solc-0.7`. Notional V2 is compiled on Solidity 0.7.5.
+
+# Statistics
+
+## Code Size
+
+| Module      | File                        | Code | Comments | Total Lines | Complexity / Line |
+| :---------- | :-------------------------- | ---: | -------: | ----------: | ----------------: |
+| Actions     | AccountAction.sol           |   92 |       51 |         167 |              10.9 |
+| Actions     | BatchAction.sol             |  289 |       35 |         366 |              17.6 |
+| Actions     | ERC1155Action.sol           |  228 |       73 |         343 |              17.1 |
+| Actions     | GovernanceAction.sol        |  213 |      102 |         349 |              10.3 |
+| Actions     | InitializeMarketsAction.sol |  408 |      144 |         618 |              11.5 |
+| Actions     | LiquidateCurrencyAction.sol |  310 |       48 |         389 |               1.0 |
+| Actions     | LiquidatefCashAction.sol    |  174 |       40 |         235 |               1.1 |
+| Actions     | TradingAction.sol           |  423 |       42 |         521 |              12.5 |
+| Actions     | nTokenAction.sol            |  245 |       65 |         355 |              10.6 |
+| Actions     | nTokenMintAction.sol        |  220 |       52 |         307 |              15.5 |
+| Actions     | nTokenRedeemAction.sol      |  211 |       51 |         301 |              14.2 |
+| Adapters    | NotionalV1Migrator.sol      |  300 |       19 |         358 |               6.7 |
+| Adapters    | cTokenAggregator.sol        |   35 |        6 |          52 |               2.9 |
+| Adapters    | nTokenERC20Proxy.sol        |   74 |       43 |         136 |               0.0 |
+| Balances    | BalanceHandler.sol          |  336 |       72 |         466 |              17.0 |
+| Balances    | Incentives.sol              |   81 |       24 |         124 |              12.3 |
+| Balances    | TokenHandler.sol            |  190 |       25 |         250 |              22.6 |
+| External    | FreeCollateralExternal.sol  |   50 |       17 |          77 |               6.0 |
+| External    | Router.sol                  |  183 |       34 |         241 |              32.8 |
+| External    | SettleAssetsExternal.sol    |  106 |        9 |         132 |               6.6 |
+| External    | Views.sol                   |  388 |       46 |         485 |               4.6 |
+| Global      | Constants.sol               |   54 |       31 |         102 |               0.0 |
+| Global      | StorageLayoutV1.sol         |   15 |       20 |          42 |               0.0 |
+| Global      | Types.sol                   |  180 |      138 |         345 |               0.0 |
+| Governance  | GovernorAlpha.sol           |  314 |       94 |         472 |              12.4 |
+| Governance  | NoteERC20.sol               |  260 |       88 |         407 |              13.5 |
+| Governance  | Reservoir.sol               |   32 |       23 |          66 |               6.2 |
+| Internal    | AccountContextHandler.sol   |  180 |       47 |         268 |              29.4 |
+| Internal    | nTokenHandler.sol           |  348 |       64 |         467 |               7.8 |
+| Liquidation | LiquidateCurrency.sol       |  387 |       89 |         536 |              12.7 |
+| Liquidation | LiquidatefCash.sol          |  332 |       68 |         455 |               9.3 |
+| Liquidation | LiquidationHelpers.sol      |  175 |       27 |         229 |              13.1 |
+| Markets     | AssetRate.sol               |  184 |       36 |         258 |              12.0 |
+| Markets     | CashGroup.sol               |  284 |       45 |         370 |               6.3 |
+| Markets     | DateTime.sol                |  139 |       19 |         189 |              28.8 |
+| Markets     | Market.sol                  |  538 |      177 |         817 |              10.0 |
+| Math        | ABDKMath64x64.sol           |  168 |       52 |         244 |              47.0 |
+| Math        | Bitmap.sol                  |   56 |        7 |          75 |              16.1 |
+| Math        | SafeInt256.sol              |   37 |       16 |          75 |              37.8 |
+| Portfolio   | BitmapAssetsHandler.sol     |  232 |       16 |         288 |              15.1 |
+| Portfolio   | PortfolioHandler.sol        |  301 |       46 |         398 |              20.3 |
+| Portfolio   | TransferAssets.sol          |   84 |        6 |         102 |              11.9 |
+| Settlement  | SettleBitmapAssets.sol      |  210 |       26 |         264 |              19.0 |
+| Settlement  | SettlePortfolioAssets.sol   |  137 |       19 |         183 |              26.3 |
+| Valuation   | AssetHandler.sol            |  203 |       33 |         275 |              16.7 |
+| Valuation   | ExchangeRate.sol            |   70 |       23 |         108 |              14.3 |
+| Valuation   | FreeCollateral.sol          |  391 |       45 |         495 |              15.9 |
+
+## Test Coverage
+
+TODO
+
+## Gas Costs
+
+TODO
