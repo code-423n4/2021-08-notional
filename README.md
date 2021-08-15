@@ -7,8 +7,9 @@ Notional is a fixed rate lending and borrowing platform, built on Ethereum. **Fi
 # Contest scope information
 
 All code in `contracts/` is in scope, excluding:
-    - `contracts/mocks/`
-    - `contracts/proxy` (this is just a port from OpenZeppelin for Solidity 0.7)
+
+- `contracts/mocks`
+- `contracts/proxy` (this is just a port from OpenZeppelin for Solidity 0.7)
     
 A full protocol description can be found in [the whitepaper](WHITEPAPER.md). Detailed code walkthroughs can be found at:
 
