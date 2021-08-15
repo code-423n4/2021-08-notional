@@ -4,11 +4,13 @@ pragma experimental ABIEncoderV2;
 
 import "interfaces/notional/NotionalProxy.sol";
 import "@openzeppelin/contracts/proxy/Initializable.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "../../proxy/utils/UUPSUpgradeable.sol";
 
 /// @title Note ERC20 Token
 /// Fork of Compound Comp token at commit hash
 /// https://github.com/compound-finance/compound-protocol/commit/9bcff34a5c9c76d51e51bcb0ca1139588362ef96
-contract NoteERC20 is Initializable {
+contract NoteERC20 is Initializable, UUPSUpgradeable {
     /// @notice EIP-20 token name for this token
     string public constant name = "Notional";
 
@@ -56,6 +58,12 @@ contract NoteERC20 is Initializable {
     /// @notice A record of states for signing / validating signatures
     mapping(address => uint256) public nonces;
 
+    /// @notice Owner address which can upgrade the tokens implementation
+    address public owner;
+
+    /// @notice Emitted when the ownership of the contract is transferred
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
     /// @notice An event thats emitted when an account changes its delegate
     event DelegateChanged(
         address indexed delegator,
@@ -79,25 +87,47 @@ contract NoteERC20 is Initializable {
     /// @notice Initialize note token with initial grants
     /// @param initialAccounts initial address to grant tokens to
     /// @param initialGrantAmount amount to grant address initially
-    /// @param notionalProxy_ address of notional proxy
     function initialize(
         address[] calldata initialAccounts,
         uint96[] calldata initialGrantAmount,
-        NotionalProxy notionalProxy_
+        address owner_
     ) public initializer {
         require(initialGrantAmount.length == initialAccounts.length);
 
-        notionalProxy = notionalProxy_;
-        uint96 totalGrants;
-        for (uint256 i; i < initialGrantAmount.length; i++) {
+        uint96 totalGrants = 0;
+        for (uint256 i = 0; i < initialGrantAmount.length; i++) {
             totalGrants = _add96(totalGrants, initialGrantAmount[i], "");
+            require(balances[initialAccounts[i]] == 0, "Duplicate account");
             balances[initialAccounts[i]] = initialGrantAmount[i];
 
             emit Transfer(address(0), initialAccounts[i], initialGrantAmount[i]);
         }
 
         require(totalGrants == totalSupply);
+        owner = owner_;
     }
+
+    modifier onlyOwner() {
+        require(owner == msg.sender, "Ownable: caller is not the owner");
+        _;
+    }
+
+    function activateNotional(NotionalProxy notionalProxy_) external onlyOwner {
+        require(address(notionalProxy) == address(0), "Notional Proxy already initialized");
+        Address.isContract(address(notionalProxy_));
+        notionalProxy = notionalProxy_;
+    }
+
+    /// @dev Transfers ownership of the contract to a new account (`newOwner`).
+    /// Can only be called by the current owner.
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
+    }
+
+    /// @dev Only the owner may upgrade the contract
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner { }
 
     /// @notice Get the number of tokens `spender` is approved to spend on behalf of `account`
     /// @param account The address of the account holding the funds
@@ -157,6 +187,14 @@ contract NoteERC20 is Initializable {
         address dst,
         uint256 rawAmount
     ) external returns (bool) {
+        // Short circuit transfer execution and return true. It may be the case that external
+        // logic tries to execute a zero transfer but don't emit events here.
+        if (rawAmount == 0) {
+            // Emit a zero transfer event for ERC20 token compatibility
+            emit Transfer(src, dst, 0);
+            return true;
+        }
+
         address spender = msg.sender;
         uint96 spenderAllowance = allowances[src][spender];
         uint96 amount = _safe96(rawAmount, "Note::approve: amount exceeds 96 bits");
@@ -181,7 +219,7 @@ contract NoteERC20 is Initializable {
     /// @param delegatee The address to delegate votes to
     /// @dev emit:DelegatesChanged
     function delegate(address delegatee) public {
-        return _delegate(msg.sender, delegatee);
+        _delegate(msg.sender, delegatee);
     }
 
     /// @notice Delegates votes from signatory to `delegatee`
@@ -206,11 +244,11 @@ contract NoteERC20 is Initializable {
             );
         bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry));
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, structHash));
-        address signatory = ecrecover(digest, v, r, s);
-        require(signatory != address(0), "Note::delegateBySig: invalid signature");
+        // ECDSA will check if address is zero inside
+        address signatory = ECDSA.recover(digest, v, r, s);
         require(nonce == nonces[signatory]++, "Note::delegateBySig: invalid nonce");
         require(block.timestamp <= expiry, "Note::delegateBySig: signature expired");
-        return _delegate(signatory, delegatee);
+        _delegate(signatory, delegatee);
     }
 
     /// @notice Gets the current votes balance for `account`
@@ -242,7 +280,11 @@ contract NoteERC20 is Initializable {
 
         // First check most recent balance
         if (checkpoints[account][nCheckpoints - 1].fromBlock <= blockNumber) {
-            return checkpoints[account][nCheckpoints - 1].votes;
+            return _add96(
+                checkpoints[account][nCheckpoints - 1].votes,
+                getUnclaimedVotes(account),
+                "Note::getPriorVotes: uint96 overflow"
+            );
         }
 
         // Next check implicit zero balance
@@ -256,7 +298,12 @@ contract NoteERC20 is Initializable {
             uint32 center = upper - (upper - lower) / 2; // ceil, avoiding overflow
             Checkpoint memory cp = checkpoints[account][center];
             if (cp.fromBlock == blockNumber) {
-                return cp.votes;
+                return
+                    _add96(
+                        cp.votes,
+                        getUnclaimedVotes(account),
+                        "Note::getPriorVotes: uint96 overflow"
+                    );
             } else if (cp.fromBlock < blockNumber) {
                 lower = center;
             } else {
@@ -277,6 +324,9 @@ contract NoteERC20 is Initializable {
     /// @param account the address of the Notional account to check
     /// @return Total number of unclaimed tokens accrued on the Notional account
     function getUnclaimedVotes(address account) public view returns (uint96) {
+        // If the notional proxy is not set then there are no unclaimed votes
+        if (address(notionalProxy) == address(0)) return 0;
+
         uint256 votes = notionalProxy.nTokenGetClaimableIncentives(account, block.timestamp);
         require(votes <= type(uint96).max);
         return uint96(votes);

@@ -29,6 +29,49 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "currencyId",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint40",
+                "name": "maturity",
+                "type": "uint40"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netAssetCash",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netfCash",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netLiquidityTokens",
+                "type": "int256"
+            }
+        ],
+        "name": "AddRemoveLiquidity",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "owner",
@@ -79,25 +122,6 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint16",
-                "name": "currencyId",
-                "type": "uint16"
-            }
-        ],
-        "name": "BatchTradeExecution",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "account",
@@ -136,6 +160,49 @@
             }
         ],
         "name": "DeployNToken",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "currencyId",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint40",
+                "name": "maturity",
+                "type": "uint40"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netAssetCash",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netfCash",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netFee",
+                "type": "int256"
+            }
+        ],
+        "name": "LendBorrowTrade",
         "type": "event"
     },
     {
@@ -228,12 +295,6 @@
                 "type": "address"
             },
             {
-                "indexed": true,
-                "internalType": "address",
-                "name": "liquidator",
-                "type": "address"
-            },
-            {
                 "indexed": false,
                 "internalType": "uint16",
                 "name": "localCurrencyId",
@@ -316,6 +377,25 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": true,
+                "internalType": "address",
+                "name": "pauseRouter",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "pauseGuardian",
+                "type": "address"
+            }
+        ],
+        "name": "PauseRouterAndGuardianUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": false,
                 "internalType": "uint256",
                 "name": "currencyId",
@@ -357,9 +437,34 @@
                 "internalType": "int256",
                 "name": "amountToSettleAsset",
                 "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "fCashAmount",
+                "type": "int256"
             }
         ],
         "name": "SettledCashDebt",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint16",
+                "name": "currencyId",
+                "type": "uint16"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "cashIntoMarkets",
+                "type": "int256"
+            }
+        ],
+        "name": "SweepCashIntoMarkets",
         "type": "event"
     },
     {
@@ -498,6 +603,25 @@
         "inputs": [
             {
                 "indexed": false,
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "approved",
+                "type": "bool"
+            }
+        ],
+        "name": "UpdateAuthorizedCallbackContract",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
                 "internalType": "uint16",
                 "name": "currencyId",
                 "type": "uint16"
@@ -615,6 +739,12 @@
                 "indexed": false,
                 "internalType": "int256",
                 "name": "fCashAmountToPurchase",
+                "type": "int256"
+            },
+            {
+                "indexed": false,
+                "internalType": "int256",
+                "name": "netAssetCashNToken",
                 "type": "int256"
             }
         ],
@@ -803,6 +933,66 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "enum DepositActionType",
+                        "name": "actionType",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint16",
+                        "name": "currencyId",
+                        "type": "uint16"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "depositActionAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "withdrawAmountInternalPrecision",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "withdrawEntireCashBalance",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "redeemToUnderlying",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "bytes32[]",
+                        "name": "trades",
+                        "type": "bytes32[]"
+                    }
+                ],
+                "internalType": "struct BalanceActionWithTrades[]",
+                "name": "actions",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "bytes",
+                "name": "callbackData",
+                "type": "bytes"
+            }
+        ],
+        "name": "batchBalanceAndTradeActionWithCallback",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "liquidateAccount",
                 "type": "address"
             },
@@ -868,6 +1058,11 @@
         ],
         "name": "calculateLocalCurrencyLiquidation",
         "outputs": [
+            {
+                "internalType": "int256",
+                "name": "",
+                "type": "int256"
+            },
             {
                 "internalType": "int256",
                 "name": "",
@@ -1157,12 +1352,17 @@
                     },
                     {
                         "internalType": "uint8",
-                        "name": "settlementPenaltyRateBPS",
+                        "name": "settlementPenaltyRate5BPS",
                         "type": "uint8"
                     },
                     {
                         "internalType": "uint8",
                         "name": "liquidationfCashHaircut5BPS",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "liquidationDebtBuffer5BPS",
                         "type": "uint8"
                     },
                     {
@@ -1291,7 +1491,7 @@
                     },
                     {
                         "internalType": "uint256",
-                        "name": "lastClaimSupplyAmount",
+                        "name": "lastClaimIntegralSupply",
                         "type": "uint256"
                     }
                 ],
@@ -1715,12 +1915,17 @@
                     },
                     {
                         "internalType": "uint8",
-                        "name": "settlementPenaltyRateBPS",
+                        "name": "settlementPenaltyRate5BPS",
                         "type": "uint8"
                     },
                     {
                         "internalType": "uint8",
                         "name": "liquidationfCashHaircut5BPS",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "liquidationDebtBuffer5BPS",
                         "type": "uint8"
                     },
                     {
@@ -1786,12 +1991,17 @@
                     },
                     {
                         "internalType": "uint8",
-                        "name": "settlementPenaltyRateBPS",
+                        "name": "settlementPenaltyRate5BPS",
                         "type": "uint8"
                     },
                     {
                         "internalType": "uint8",
                         "name": "liquidationfCashHaircut5BPS",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "liquidationDebtBuffer5BPS",
                         "type": "uint8"
                     },
                     {
@@ -2093,6 +2303,19 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "getImplementation",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint16",
@@ -2168,6 +2391,16 @@
                 "internalType": "int256",
                 "name": "cashBalance",
                 "type": "int256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "integralTotalSupply",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "lastSupplyChangeTime",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -2590,6 +2823,11 @@
                 "internalType": "int256",
                 "name": "",
                 "type": "int256"
+            },
+            {
+                "internalType": "int256",
+                "name": "",
+                "type": "int256"
             }
         ],
         "stateMutability": "nonpayable",
@@ -2897,7 +3135,13 @@
             }
         ],
         "name": "nTokenRedeem",
-        "outputs": [],
+        "outputs": [
+            {
+                "internalType": "int256",
+                "name": "",
+                "type": "int256"
+            }
+        ],
         "stateMutability": "nonpayable",
         "type": "function"
     },
@@ -3086,6 +3330,45 @@
         "type": "function"
     },
     {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pauseGuardian",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "pauseRouter",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [
             {
                 "internalType": "address",
@@ -3173,6 +3456,24 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "pauseRouter_",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "pauseGuardian_",
+                "type": "address"
+            }
+        ],
+        "name": "setPauseRouterAndGuardian",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "account",
                 "type": "address"
             }
@@ -3204,6 +3505,19 @@
     {
         "inputs": [
             {
+                "internalType": "uint16",
+                "name": "currencyId",
+                "type": "uint16"
+            }
+        ],
+        "name": "sweepCashIntoMarkets",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address",
                 "name": "newOwner",
                 "type": "address"
@@ -3228,6 +3542,24 @@
             }
         ],
         "name": "updateAssetRate",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "operator",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "approved",
+                "type": "bool"
+            }
+        ],
+        "name": "updateAuthorizedCallbackContract",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -3273,12 +3605,17 @@
                     },
                     {
                         "internalType": "uint8",
-                        "name": "settlementPenaltyRateBPS",
+                        "name": "settlementPenaltyRate5BPS",
                         "type": "uint8"
                     },
                     {
                         "internalType": "uint8",
                         "name": "liquidationfCashHaircut5BPS",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "liquidationDebtBuffer5BPS",
                         "type": "uint8"
                     },
                     {
@@ -3458,6 +3795,37 @@
         "name": "updateTokenCollateralParameters",
         "outputs": [],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newImplementation",
+                "type": "address"
+            }
+        ],
+        "name": "upgradeTo",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newImplementation",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "data",
+                "type": "bytes"
+            }
+        ],
+        "name": "upgradeToAndCall",
+        "outputs": [],
+        "stateMutability": "payable",
         "type": "function"
     },
     {
