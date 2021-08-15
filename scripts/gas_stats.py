@@ -758,12 +758,12 @@ DEPOSIT_PARAMETERS = {
 }
 
 INIT_PARAMETERS = {
-    2: [[int(1.01e9)] * 2, [int(0.5e9)] * 2],
-    3: [[int(1.01e9)] * 3, [int(0.5e9)] * 3],
-    4: [[int(1.01e9)] * 4, [int(0.5e9)] * 4],
-    5: [[int(1.01e9)] * 5, [int(0.5e9)] * 5],
-    6: [[int(1.01e9)] * 6, [int(0.5e9)] * 6],
-    7: [[int(1.01e9)] * 7, [int(0.5e9)] * 7],
+    2: [[int(0.01e9)] * 2, [int(0.5e9)] * 2],
+    3: [[int(0.01e9)] * 3, [int(0.5e9)] * 3],
+    4: [[int(0.01e9)] * 4, [int(0.5e9)] * 4],
+    5: [[int(0.01e9)] * 5, [int(0.5e9)] * 5],
+    6: [[int(0.01e9)] * 6, [int(0.5e9)] * 6],
+    7: [[int(0.01e9)] * 7, [int(0.5e9)] * 7],
 }
 
 
@@ -834,8 +834,8 @@ def main():
 
         cashGroup = list(env.notional.getCashGroup(currencyId))
         cashGroup[0] = maxMarkets
-        cashGroup[8] = CurrencyDefaults["tokenHaircut"][0:maxMarkets]
-        cashGroup[9] = CurrencyDefaults["rateScalar"][0:maxMarkets]
+        cashGroup[9] = CurrencyDefaults["tokenHaircut"][0:maxMarkets]
+        cashGroup[10] = CurrencyDefaults["rateScalar"][0:maxMarkets]
         env.notional.updateCashGroup(currencyId, cashGroup)
         env.notional.updateDepositParameters(currencyId, *(DEPOSIT_PARAMETERS[maxMarkets]))
         env.notional.updateInitializationParameters(currencyId, *(INIT_PARAMETERS[maxMarkets]))

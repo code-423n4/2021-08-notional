@@ -35,6 +35,8 @@ library LiquidationHelpers {
             PortfolioState memory
         )
     {
+        // Cannot liquidate yourself
+        require(msg.sender != liquidateAccount);
         require(localCurrency != 0);
         // Collateral currency must be unset or not equal to the local currency
         require(collateralCurrency == 0 || collateralCurrency != localCurrency);
@@ -70,20 +72,24 @@ library LiquidationHelpers {
         int256 maxTotalBalance,
         int256 userSpecifiedMaximum
     ) internal pure returns (int256) {
-        int256 maxAllowedAmount =
+        // By default, the liquidator is allowed to purchase at least to `defaultAllowedAmount`
+        // if `initialAmountToLiquidate` is less than `defaultAllowedAmount`.
+        int256 defaultAllowedAmount =
             maxTotalBalance.mul(Constants.DEFAULT_LIQUIDATION_PORTION).div(
                 Constants.PERCENTAGE_DECIMALS
             );
 
         int256 result = initialAmountToLiquidate;
 
+        // Limit the purchase amount by the max total balance, we cannot purchase
+        // more than what is available.
         if (initialAmountToLiquidate > maxTotalBalance) {
             result = maxTotalBalance;
         }
 
-        if (initialAmountToLiquidate < maxAllowedAmount) {
-            // Allow the liquidator to go up to the max allowed amount
-            result = maxAllowedAmount;
+        if (initialAmountToLiquidate < defaultAllowedAmount) {
+            // Allow the liquidator to go up to the default allowed amount
+            result = defaultAllowedAmount;
         }
 
         if (userSpecifiedMaximum > 0 && result > userSpecifiedMaximum) {
@@ -146,9 +152,10 @@ library LiquidationHelpers {
             factors.localAssetRate.convertFromUnderlying(localUnderlyingFromLiquidator);
 
         if (localAssetFromLiquidator > factors.localAssetAvailable.neg()) {
-            // If the local to purchase will put the local available into negative territory we
-            // have to cut the collateral purchase amount back. Putting local available into negative
-            // territory will force the liquidated account to incur more debt.
+            // If the local to purchase will flip the sign of localAssetAvailable then the calculations
+            // for the collateral purchase amounts will be thrown off. The positive portion of localAssetAvailable
+            // has to have a haircut applied. If this haircut reduces the localAssetAvailable value below
+            // the collateralAssetValue then this may actually decrease overall free collateral.
             collateralAssetBalanceToSell = collateralAssetBalanceToSell
                 .mul(factors.localAssetAvailable.neg())
                 .div(localAssetFromLiquidator);
@@ -180,8 +187,8 @@ library LiquidationHelpers {
             require(
                 liquidatorLocalBalance.storedCashBalance >= netLocalFromLiquidator &&
                     liquidatorContext.hasDebt == 0x00,
-                "Token transfer unavailable"
-            );
+                "No cash"
+            ); // dev: token has transfer fee, no liquidator balance
             liquidatorLocalBalance.netCashChange = netLocalFromLiquidator.neg();
         } else {
             token.transfer(liquidator, token.convertToExternal(netLocalFromLiquidator));

@@ -11,5 +11,5 @@ brownie run sandbox.py --network sandbox
 tag=`git rev-parse --short HEAD`
 docker build -t jeffywu/sandbox2:$tag .
 docker tag jeffywu/sandbox2:$tag jeffywu/sandbox2:latest
-# docker push jeffywu/sandbox2:$tag
-# docker push jeffywu/sandbox2:latest
+docker push jeffywu/sandbox2:$tag
+docker push jeffywu/sandbox2:latest
