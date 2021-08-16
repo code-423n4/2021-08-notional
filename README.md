@@ -24,13 +24,12 @@ Notional V2 also uses a few different internal decimal precision values. All int
 
 ## Notional V2 contest details
 
-- TBD main award pot
-- TBD gas optimization award pot
+- $150,000 USDC + $50,000 NOTE main award pot
 - Join [C4 Discord](https://discord.gg/EY5dvm3evD) to register
-- Submit findings [using the C4 form](https://c4-TBD.netlify.app/)
+- Submit findings [using the C4 form](https://code423n4.com/2021-08-notional/submit)
 - [Read our guidelines for more details](https://code423n4.com/compete)
-- Starts TBD XXX XXX XX 00:00 UTC
-- Ends TBD XXX XXX XX 23:59 UTC
+- Starts August 26, 2021 00:00 UTC
+- Ends September 8, 2021 23:59 UTC
 
 ---
 
