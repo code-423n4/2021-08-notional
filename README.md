@@ -24,7 +24,7 @@ Notional V2 also uses a few different internal decimal precision values. All int
 
 ## Notional V2 contest details
 
-- $150,000 USDC + $50,000 NOTE main award pot
+- &#36;150,000 USDC + &#36;50,000 NOTE main award pot
 - Join [C4 Discord](https://discord.gg/EY5dvm3evD) to register
 - Submit findings [using the C4 form](https://code423n4.com/2021-08-notional-contest/submit)
 - [Read our guidelines for more details](https://code423n4.com/compete)
